@@ -372,6 +372,58 @@ static int print_section_export(FILE *in)
   return 0;
 }
 
+static int print_section_code(FILE *in)
+{
+  int len, n, i, ch;
+  uint32_t count, body_size, local_count, local_entry;
+
+  if (read_varuint(in, &count, &len) != 0) { return -1; }
+
+  printf("\n");
+  printf("      count: %d\n", count);
+
+  for (n = 0; n < count; n++)
+  {
+    if (read_varuint(in, &body_size, &len) != 0) { return -1; }
+    if (read_varuint(in, &local_count, &len) != 0) { return -1; }
+
+    printf("   body_size: %d\n", body_size);
+    printf(" local_count: %d\n", local_count);
+    printf("      locals:");
+
+    body_size -= len;
+
+    for (i = 0; i < local_count; i++)
+    {
+      if (read_varuint(in, &local_entry, &len) != 0) { return -1; }
+
+      body_size -= len;
+
+      printf(" %s", get_type(local_entry));
+    }
+
+    printf("\n");
+    printf("        code:");
+
+    for (i = 0; i < body_size; i++)
+    {
+      ch = getc(in);
+
+      if (ch == EOF)
+      {
+        printf("Error: Premature end of file.\n");
+        return -1;
+      }
+
+      printf(" %02x", ch);
+    }
+
+    printf("\n");
+  }
+
+  return 0;
+}
+
 static int print_section(FILE *in)
 {
   int len, n, ch;
@@ -423,6 +475,9 @@ static int print_section(FILE *in)
       break;
     case 7:
       print_section_export(in);
+      break;
+    case 10:
+      print_section_code(in);
       break;
     default:
     {
