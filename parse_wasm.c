@@ -32,7 +32,7 @@ static char *section_names[] =
 
 static int read_uint(FILE *in, uint32_t *n, int len)
 {
-  char ch;
+  int ch;
   int shift = 0;
   int i;
 
@@ -57,7 +57,7 @@ static int read_uint(FILE *in, uint32_t *n, int len)
 
 static int read_varuint(FILE *in, uint32_t *n, int *len)
 {
-  char ch;
+  int ch;
   int shift = 0;
   int done = 0;
 
@@ -93,7 +93,7 @@ static int read_varuint(FILE *in, uint32_t *n, int *len)
 #if 0
 static int read_varint(FILE *in, int32_t *n, int *len)
 {
-  char ch;
+  int ch;
   int shift = 0;
   int done = 0;
   int num = 0;
