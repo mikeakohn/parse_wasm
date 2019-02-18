@@ -14,7 +14,7 @@ enum
   TYPE_BLOCK_TYPE = 0x40,
 };
 
-static char *section_names[] =
+static const char *section_names[] =
 {
   "",
   "Type",      // 1
@@ -175,7 +175,7 @@ static int print_header(FILE *in)
   return 0;
 }
 
-static char *get_type(int type)
+static const char *get_type(int type)
 {
   switch (type)
   {
@@ -188,6 +188,15 @@ static char *get_type(int type)
     case TYPE_BLOCK_TYPE: return "<pseudo type>";
     default: return "?";
   }
+}
+
+static const char *get_kind(int kind)
+{
+  const char *kinds[] = { "Function", "Table", "Memory", "Global" };
+
+  if (kind < 0 || kind > 3) { return ""; }
+
+  return kinds[kind];
 }
 
 static int print_section_type(FILE *in)
@@ -347,7 +356,7 @@ static int print_section_global(FILE *in)
 static int print_section_export(FILE *in)
 {
   int len, n;
-  uint32_t count, type, index, field_len;
+  uint32_t count, kind, index, field_len;
 
   if (read_varuint(in, &count, &len) != 0) { return -1; }
 
@@ -362,10 +371,10 @@ static int print_section_export(FILE *in)
     printf("       field: ");
     print_string(in, field_len);
 
-    if (read_varuint(in, &type, &len) != 0) { return -1; }
+    if (read_varuint(in, &kind, &len) != 0) { return -1; }
     if (read_varuint(in, &index, &len) != 0) { return -1; }
 
-    printf("         type: %02x %s\n", type, get_type(type));
+    printf("         kind: %02x %s\n", kind, get_kind(kind));
     printf("        index: %d\n", index);
   }
 
@@ -430,7 +439,7 @@ static int print_section(FILE *in)
   uint32_t id;
   uint32_t payload_len;
   //uint32_t name_len;
-  char *section_name = "";
+  const char *section_name = "";
 
   printf("--- SECTION (offset=0x%04x) ---\n", (int)ftell(in));
 
